@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22'
+
+      - name: Build
+        run: |
+          # AMD64 builds
+          GOOS=linux GOARCH=amd64 go build -o expand-cidr-linux-amd64 main.go
+          GOOS=darwin GOARCH=amd64 go build -o expand-cidr-darwin-amd64 main.go
+          GOOS=windows GOARCH=amd64 go build -o expand-cidr-windows-amd64.exe main.go
+          
+          # ARM64 builds
+          GOOS=linux GOARCH=arm64 go build -o expand-cidr-linux-arm64 main.go
+          GOOS=darwin GOARCH=arm64 go build -o expand-cidr-darwin-arm64 main.go
+          
+          # ARM 32-bit builds
+          GOOS=linux GOARCH=arm GOARM=7 go build -o expand-cidr-linux-armv7 main.go
+          GOOS=linux GOARCH=arm GOARM=6 go build -o expand-cidr-linux-armv6 main.go
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            expand-cidr-linux-amd64
+            expand-cidr-darwin-amd64
+            expand-cidr-windows-amd64.exe
+            expand-cidr-linux-arm64
+            expand-cidr-darwin-arm64
+            expand-cidr-linux-armv7
+            expand-cidr-linux-armv6
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,10 @@
+# Binaries
+expand-cidr
+expand-cidr-*
+*.exe
+
+# Test files
+test-builds/
+
+# OS files
+.DS_Store
